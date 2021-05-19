@@ -3,6 +3,7 @@ import './search-panel.css'
 
 const SearchPanel = () => {
   const searchText = "search"
+
   return (
     <input placeholder={searchText} className="search-input" />
   )
