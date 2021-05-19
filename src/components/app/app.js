@@ -25,7 +25,35 @@ export default class App extends Component {
       this.createItem('Drink coffee'),
       this.createItem('Build Awesome App'),
       this.createItem('Have a dinner')
-    ]
+    ],
+    searchText: '',
+    status: 'All'
+  }
+
+  searchChanged = (searchText) => {
+    this.setState({searchText})
+  }
+
+  statusChanged = (status) => {
+    this.setState({status})
+  }
+
+  searchItems = (items, searchText) => {
+    if (!searchText) return items
+
+    return items.filter(item => item.label.toUpperCase()
+      .indexOf(searchText.toUpperCase()) !== -1)
+  }
+
+  filterStatus = (items, status) => {
+    switch (status) {
+      case 'Active':
+        return items.filter(item => !item.done)
+      case 'Done':
+        return items.filter(item => item.done)
+      default:
+        return items
+    }
   }
 
   deleteItem = (id) => {
@@ -46,7 +74,7 @@ export default class App extends Component {
 
   toggleProperty = (id, propName) => {
     this.setState(({todoList}) => {
-      const newTodoList = [...todoList]
+      let newTodoList = [...todoList]
       const idx = newTodoList.findIndex(item => item.id === id)
       newTodoList[idx][propName] = !newTodoList[idx][propName]
       return {todoList: newTodoList}
@@ -62,18 +90,20 @@ export default class App extends Component {
   }
 
   render() {
-    const {todoList} = this.state
+    const {todoList, status, searchText} = this.state
     const countToDo = todoList.filter(item => !item.done).length
     const countDone = todoList.filter(item => item.done).length
+    const filteredItems = this.filterStatus(this.searchItems(todoList, searchText), status)
 
     return (
       <div className="todo-app">
         <AppHeader toDo={countToDo} done={countDone}/>
         <div className="top-panel d-flex">
-          <SearchPanel/>
-          <ItemStatusFilter/>
+          <SearchPanel onTypeSearch={this.searchChanged}/>
+          <ItemStatusFilter status={status}
+                            onChangeStatus={this.statusChanged}/>
         </div>
-        <TodoList todos={todoList}
+        <TodoList todos={filteredItems}
                   onDeleted={this.deleteItem}
                   onToggleDone={this.onToggleDone}
                   onToggleImportant={this.onToggleImportant}/>
